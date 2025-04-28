@@ -14,6 +14,13 @@ export default function Navbar() {
   const [showAccessInput, setShowAccessInput] = useState(!localStorage.getItem('accessCode'));
   const [error, setError] = useState('');
 
+  const scrollToPlans = () => {
+    const plansSection = document.getElementById('pricing-section');
+    if (plansSection) {
+      plansSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const decrementAccess = async () => {
       if (isApp && accessCode && !showAccessInput) {
@@ -96,7 +103,7 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex flex-wrap items-center justify-between py-4 gap-4">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Cpu className="h-8 w-8 text-blue-500" />
@@ -110,28 +117,38 @@ export default function Navbar() {
             </Link>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-4">
             {showAccessInput ? (
-              <form onSubmit={handleAccessCodeSubmit} className="flex flex-col items-end">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    placeholder="Código de Acesso"
-                    className="px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
-                  />
+              <div className="flex flex-wrap items-center gap-4">
+                {location.pathname === '/' && (
                   <button
-                    type="submit"
+                    onClick={scrollToPlans}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150"
                   >
-                    Validar
+                    Planos
                   </button>
-                </div>
-                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-              </form>
+                )}
+                <form onSubmit={handleAccessCodeSubmit} className="flex flex-col w-full sm:w-auto">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                    <input
+                      type="text"
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value)}
+                      placeholder="Código de Acesso"
+                      className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150"
+                    >
+                      Validar
+                    </button>
+                  </div>
+                  {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                </form>
+              </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <span className="text-gray-300">
                   Acessos restantes: <span className="font-bold text-blue-400">{remainingAccesses}</span>
                 </span>
@@ -148,7 +165,7 @@ export default function Navbar() {
             {!isApp && localStorage.getItem('accessCode') && (
               <Link
                 to="/app"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Acessar App
               </Link>

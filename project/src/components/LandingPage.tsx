@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Brain, Target, BarChart as ChartBar, Zap, Cpu, Lightbulb, Users, TrendingUp, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Brain, Target, BarChart as ChartBar, Zap, Cpu, Lightbulb, Users, TrendingUp, Check, CreditCard } from 'lucide-react';
+import MercadoPagoCheckout from './MercadoPagoCheckout';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const gtoFeatures = [
   {
@@ -88,25 +90,80 @@ const accessPlans = [
 
 function LandingPage() {
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
+  const [accessCode, setAccessCode] = useState<string | null>(null);
+  
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleWhatsAppClick = (planIndex?: number) => {
-    const baseUrl = 'https://wa.me/5511940738778?text=';
-    let message = '';
-
-    if (planIndex !== undefined && planIndex >= 0 && planIndex < accessPlans.length) {
-      const plan = accessPlans[planIndex];
-      message = encodeURIComponent(
-        `Olá! Gostaria de adquirir o ${plan.name} da ferramenta GTO Pré-Flop Poker por ${plan.price}, que inclui ${plan.accesses} acessos.`
-      );
-    } else {
-      message = encodeURIComponent('Olá! Gostaria de saber mais sobre a ferramenta GTO Pré-Flop Poker.');
+  // Verificar parâmetros de URL para status de pagamento
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    const duration = params.get('duration');
+    
+    if (status === 'approved' && duration) {
+      setPaymentStatus('approved');
+      // Gerar código de acesso temporário (em produção, isso viria do backend)
+      const tempCode = `GTO-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+      setAccessCode(tempCode);
+      
+      // Em uma implementação real, o backend geraria e salvaria este código
+      // Aqui estamos apenas simulando para demonstração
+      localStorage.setItem('accessCode', tempCode);
+      
+      // Redirecionar para a aplicação após alguns segundos
+      setTimeout(() => {
+        navigate('/app');
+      }, 5000);
     }
+  }, [location, navigate]);
 
+  const handleWhatsAppClick = () => {
+    const baseUrl = 'https://wa.me/55?text=';
+    const message = encodeURIComponent('Olá! Gostaria de saber mais sobre a ferramenta GTO Pré-Flop Poker.');
     window.open(baseUrl + message, '_blank');
+  };
+
+  const handlePaymentClick = (planIndex: number) => {
+    setSelectedPlan(planIndex);
+    setShowCheckout(true);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      {/* Notificação de pagamento aprovado */}
+      {paymentStatus === 'approved' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl p-8 max-w-md w-full border border-green-500 text-center">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Pagamento Aprovado!</h2>
+            <p className="text-gray-300 mb-4">Seu acesso à ferramenta GTO foi liberado com sucesso.</p>
+            <div className="bg-gray-700 p-4 rounded-lg mb-4">
+              <p className="text-sm text-gray-400 mb-1">Seu código de acesso:</p>
+              <p className="text-xl font-mono font-bold text-green-400">{accessCode}</p>
+            </div>
+            <p className="text-gray-400 text-sm mb-4">
+              Este código foi salvo automaticamente. Você será redirecionado para a ferramenta em instantes...
+            </p>
+            <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
+              <div className="bg-green-500 h-full animate-progress"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Checkout do Mercado Pago */}
+      {showCheckout && selectedPlan !== null && (
+        <MercadoPagoCheckout 
+          plan={accessPlans[selectedPlan]} 
+          onClose={() => setShowCheckout(false)} 
+        />
+      )}
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -239,15 +296,16 @@ function LandingPage() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleWhatsAppClick(index);
+                    handlePaymentClick(index);
                   }}
-                  className={`w-full py-3 px-6 rounded-lg font-medium transition duration-150 ease-in-out ${
+                  className={`w-full py-3 px-6 rounded-lg font-medium transition duration-150 ease-in-out flex items-center justify-center gap-2 ${
                     selectedPlan === index || plan.popular
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-gray-700 hover:bg-gray-600 text-white'
                   }`}
                 >
-                  Contratar Agora
+                  <CreditCard className="w-5 h-5" />
+                  <span>Pagar com Mercado Pago</span>
                 </button>
               </div>
             ))}
