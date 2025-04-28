@@ -15,7 +15,8 @@ const port = process.env.PORT || 3000;
 const allowedOrigins = [
   'http://localhost:5173', // Vite dev server
   'http://localhost:3000',
-  'https://gtodelucasbrito.netlify.app'
+  'https://gtodelucasbrito.netlify.app', // URL antiga do Netlify (se ainda usada)
+  'https://gtopoker.com.br' // URL de produção adicionada
 ];
 
 app.use(cors({
@@ -53,6 +54,11 @@ app.post('/api/create-preference', async (req, res) => {
       ? 'https://gtodelucasbrito.netlify.app'
       : 'http://localhost:5173';
     
+    // Criando URLs absolutas para garantir que sejam válidas
+    const successUrl = 'https://example.com/success';
+    const failureUrl = 'https://example.com/failure';
+    const pendingUrl = 'https://example.com/pending';
+    
     const preferenceData = {
       items: [
         {
@@ -64,13 +70,14 @@ app.post('/api/create-preference', async (req, res) => {
           unit_price: Number(amount)
         }
       ],
-      back_urls: {
-        success: `${baseUrl}/app?status=approved&duration=${duration}`,
-        failure: `${baseUrl}?status=failure`,
-        pending: `${baseUrl}?status=pending`
-      },
-      auto_return: "approved",
-      notification_url: `${baseUrl}/api/webhook`,
+      // Removendo back_urls temporariamente para teste
+      // back_urls: {
+      //   success: successUrl,
+      //   failure: failureUrl,
+      //   pending: pendingUrl
+      // },
+      // Usando uma URL pública para notificações durante testes
+      notification_url: 'https://webhook.site/3f7f1e1c-5f1a-4d1c-9f1a-5f1a4d1c9f1a',
       statement_descriptor: "GTO POKER TOOL",
       external_reference: `plan_${duration}_months`
     };

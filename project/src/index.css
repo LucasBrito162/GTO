@@ -65,3 +65,26 @@
   animation: gradient 3s ease infinite;
   background-size: 200% 200%;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.animate-progress {
+  animation: progress 5s linear forwards;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 5s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
